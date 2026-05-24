@@ -1,23 +1,14 @@
 <?php
-// ============================================================
-//  UTS KRIPTOGRAFI — Single File Application
-//  File  : uts_kripto.php
-//  Fitur : Caesar | XOR | SHA-256 | RSA | Digital Signature
-// ============================================================
-
 session_start();
 
-// ── Helper: bersihkan output ─────────────────────────────────
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
-// ── Routing via POST action ──────────────────────────────────
 $action = $_POST['action'] ?? '';
 $result = null;
 $error  = null;
 
 switch ($action) {
 
-    // ── 1. CAESAR CIPHER ────────────────────────────────────
     case 'caesar_encrypt':
     case 'caesar_decrypt':
         $text  = $_POST['caesar_text']  ?? '';
@@ -41,7 +32,6 @@ switch ($action) {
         ];
         break;
 
-    // ── 2. XOR CIPHER ───────────────────────────────────────
     case 'xor_encrypt':
     case 'xor_decrypt':
         $text = $_POST['xor_text'] ?? '';
@@ -49,7 +39,6 @@ switch ($action) {
 
         if ($key === '') { $error = 'Kunci XOR tidak boleh kosong.'; break; }
 
-        // Jika decrypt, input adalah hex-string; konversi dulu
         if ($action === 'xor_decrypt') {
             if (!ctype_xdigit(str_replace(' ', '', $text))) {
                 $error = 'Input dekripsi harus berupa string hex (0-9 a-f).';
@@ -86,7 +75,6 @@ switch ($action) {
         }
         break;
 
-    // ── 3. SHA-256 HASHING ──────────────────────────────────
     case 'sha256':
         $text = $_POST['sha_text'] ?? '';
         $hash = hash('sha256', $text);
@@ -99,7 +87,6 @@ switch ($action) {
         ];
         break;
 
-    // ── 4. RSA GENERATE & ENCRYPT ───────────────────────────
     case 'rsa_generate':
         $bits = (int)($_POST['rsa_bits'] ?? 2048);
         if (!in_array($bits, [1024, 2048, 4096])) $bits = 2048;
@@ -170,7 +157,6 @@ switch ($action) {
         ];
         break;
 
-    // ── 5. DIGITAL SIGNATURE ────────────────────────────────
     case 'sig_generate_key':
         $cfg = ['digest_alg' => 'sha256', 'private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA];
         $res = openssl_pkey_new($cfg);
@@ -221,7 +207,6 @@ switch ($action) {
         break;
 }
 
-// ── Active tab dari POST ─────────────────────────────────────
 $tabMap = [
     'caesar_encrypt' => 'caesar', 'caesar_decrypt' => 'caesar',
     'xor_encrypt'    => 'xor',    'xor_decrypt'    => 'xor',
@@ -240,7 +225,6 @@ $activeTab = $tabMap[$action] ?? 'caesar';
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-/* ── Reset & Base ─────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -269,10 +253,8 @@ body {
         radial-gradient(ellipse 60% 40% at 90% 100%, rgba(168,255,120,.05) 0%, transparent 60%);
 }
 
-/* ── Layout ───────────────────────────────────── */
 .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px 80px; }
 
-/* ── Header ───────────────────────────────────── */
 header {
     padding: 48px 0 32px;
     text-align: center;
@@ -301,7 +283,6 @@ header::after {
     text-transform: uppercase;
 }
 
-/* ── Tab Nav ──────────────────────────────────── */
 .tabs {
     display: flex;
     gap: 6px;
@@ -335,11 +316,9 @@ header::after {
 }
 .tab-icon { font-size: 1rem; }
 
-/* ── Panels ───────────────────────────────────── */
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* ── Card ─────────────────────────────────────── */
 .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -372,7 +351,6 @@ header::after {
     line-height: 1.6;
 }
 
-/* ── Form elements ────────────────────────────── */
 .field { margin-bottom: 18px; }
 label {
     display: block;
@@ -404,7 +382,6 @@ select option { background: var(--card); }
 textarea { min-height: 90px; }
 textarea.tall { min-height: 140px; }
 
-/* ── Buttons ──────────────────────────────────── */
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
 button[type=submit] {
     font-family: var(--sans);
@@ -427,7 +404,6 @@ button[type=submit] {
 .btn-neutral { background: var(--border); color: var(--text); }
 .btn-neutral:hover { background: #3a4f7a; }
 
-/* ── Result box ───────────────────────────────── */
 .result-box {
     background: var(--surface);
     border: 1px solid var(--accent);
@@ -465,7 +441,6 @@ button[type=submit] {
 .valid   { color: var(--accent3) !important; font-weight: 700; }
 .invalid { color: var(--accent2) !important; font-weight: 700; }
 
-/* ── Error ────────────────────────────────────── */
 .error-box {
     background: rgba(255,107,107,.1);
     border: 1px solid var(--accent2);
@@ -478,11 +453,9 @@ button[type=submit] {
     animation: fadeSlide .3s ease;
 }
 
-/* ── Grid ─────────────────────────────────────── */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } .tabs { gap: 4px; } .tab-btn { font-size: .7rem; padding: 8px 13px; } }
 
-/* ── Footer ───────────────────────────────────── */
 footer {
     text-align: center;
     padding: 28px 0 12px;
@@ -502,7 +475,7 @@ footer {
     <div class="subtitle">Web Tools Kriptografi · Pertemuan 1–7</div>
 </header>
 
-<!-- ── Tab Navigation ───────────────────────────────────── -->
+<!-- Tab Navigation -->
 <nav class="tabs" id="tabNav">
     <button class="tab-btn <?= $activeTab==='caesar'?'active':'' ?>" onclick="switchTab('caesar',this)">
         <span class="tab-icon">🔄</span>Caesar Cipher
@@ -521,9 +494,7 @@ footer {
     </button>
 </nav>
 
-<!-- ══════════════════════════════════════════════════════════
-     PANEL 1 — CAESAR CIPHER
-══════════════════════════════════════════════════════════ -->
+<!-- PANEL 1 - CAESAR CIPHER -->
 <div id="panel-caesar" class="panel <?= $activeTab==='caesar'?'active':'' ?>">
     <div class="card">
         <div class="card-title">🔄 Caesar Cipher</div>
@@ -572,9 +543,7 @@ footer {
     <?php endif; ?>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     PANEL 2 — XOR CIPHER
-══════════════════════════════════════════════════════════ -->
+<!-- PANEL 2 - XOR CIPHER -->
 <div id="panel-xor" class="panel <?= $activeTab==='xor'?'active':'' ?>">
     <div class="card">
         <div class="card-title">⊕ XOR Cipher</div>
@@ -623,9 +592,7 @@ footer {
     <?php endif; ?>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     PANEL 3 — SHA-256
-══════════════════════════════════════════════════════════ -->
+<!-- PANEL 3 - SHA-256 -->
 <div id="panel-sha256" class="panel <?= $activeTab==='sha256'?'active':'' ?>">
     <div class="card">
         <div class="card-title"># SHA-256 Hashing</div>
@@ -663,12 +630,9 @@ footer {
     <?php endif; ?>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     PANEL 4 — RSA
-══════════════════════════════════════════════════════════ -->
+<!-- PANEL 4 - RSA -->
 <div id="panel-rsa" class="panel <?= $activeTab==='rsa'?'active':'' ?>">
 
-    <!-- Generate Key -->
     <div class="card">
         <div class="card-title">🗝 RSA — Generate Key Pair</div>
         <div class="card-desc">
@@ -704,7 +668,6 @@ footer {
     </div>
     <?php endif; ?>
 
-    <!-- Encrypt -->
     <div class="card" style="margin-top:20px">
         <div class="card-title" style="font-size:.95rem">🔒 RSA Enkripsi / Dekripsi</div>
         <div class="card-desc">
@@ -713,7 +676,7 @@ footer {
         </div>
 
         <div class="grid-2">
-            <!-- Encrypt -->
+            <!-- Form Enkripsi -->
             <form method="POST" action="">
                 <input type="hidden" name="action" value="rsa_encrypt">
                 <div class="field">
@@ -726,7 +689,7 @@ footer {
                 </div>
                 <button type="submit" class="btn-primary">🔒 Enkripsi</button>
             </form>
-            <!-- Decrypt -->
+            <!-- Form Dekripsi -->
             <form method="POST" action="">
                 <input type="hidden" name="action" value="rsa_decrypt">
                 <div class="field">
@@ -760,12 +723,9 @@ footer {
     <?php endif; ?>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     PANEL 5 — DIGITAL SIGNATURE
-══════════════════════════════════════════════════════════ -->
+<!-- PANEL 5 - DIGITAL SIGNATURE -->
 <div id="panel-sig" class="panel <?= $activeTab==='sig'?'active':'' ?>">
 
-    <!-- Generate Key -->
     <div class="card">
         <div class="card-title">✍️ Digital Signature — Generate Key</div>
         <div class="card-desc">
@@ -789,7 +749,7 @@ footer {
     <?php endif; ?>
 
     <div class="grid-2" style="margin-top:20px">
-        <!-- Sign -->
+        <!-- Form Sign -->
         <div class="card">
             <div class="card-title" style="font-size:.9rem">🖊 Sign Dokumen</div>
             <form method="POST" action="">
@@ -805,7 +765,7 @@ footer {
                 <button type="submit" class="btn-primary">✍️ Sign</button>
             </form>
         </div>
-        <!-- Verify -->
+        <!-- Form Verify -->
         <div class="card">
             <div class="card-title" style="font-size:.9rem">🔍 Verify Tanda Tangan</div>
             <form method="POST" action="">
@@ -859,7 +819,6 @@ footer {
 </div><!-- /wrap -->
 
 <script>
-// ── Tab switching ─────────────────────────────
 function switchTab(name, btn) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
